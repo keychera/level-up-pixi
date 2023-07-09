@@ -10,7 +10,9 @@
 
 (defn init []
   (println "Hello Shadow")
-  (let [app (PIXI/Application. (clj->js {:background "#1099bb" :width 640 :height 360}))
+  (let [app (PIXI/Application. (clj->js {:background "#1099bb" 
+                                         :resolution js/devicePixelRatio 
+                                         }))
         bunny (PIXI/Sprite.from "https://pixijs.com/assets/bunny.png")
         render-fn (fn [delta] (render delta app bunny))]
     (.. app -stage (addChild bunny))
@@ -19,4 +21,8 @@
 
 
 (comment
+
+  (clj->js {:background "#1099bb"
+            :resize js/window
+            :resolution js/devicePixelRatio})
   (init))
