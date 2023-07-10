@@ -22,3 +22,5 @@ pom.xml.asc
 
 .hgignore
 .hg/
+
+.refs
