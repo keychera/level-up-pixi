@@ -7,6 +7,9 @@
   (let [rotation (.. chest -rotation)]
     (set! (.. chest -rotation) (+ rotation (* 0.1 delta)))))
 
+(defn on-click [event]
+  (js/alert event))
+
 (defn init []
   (println "Hello Shadow")
   (set! PIXI/BaseTexture.defaultOptions.scaleMode PIXI/SCALE_MODES.NEAREST)
@@ -16,10 +19,13 @@
         chest (PIXI/Sprite. chest-texture)
         render-fn (fn [delta] (render delta app chest))]
     (js/document.body.appendChild app.view)
-    (.. app -stage (addChild chest))
     (.. chest -anchor (set 0.5))
     (set! (.. chest -width) 100)
     (set! (.. chest -height) 100)
+    (set! (.. chest -buttonMode) true)
+    (set! (.. chest -eventMode) "static")
+    (.. chest (on "pointerdown" on-click))
+    (.. app -stage (addChild chest))
     (.. app -ticker (add render-fn))))
 
 (comment
