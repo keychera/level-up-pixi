@@ -1,14 +1,14 @@
 (ns main
   (:require ["pixi.js" :as PIXI]))
 
-(defn render [delta ^js app ^js chest]
-  (set! (.. chest -x) (/ (.. app -screen -width) 2))
-  (set! (.. chest -y) (/ (.. app -screen -height) 2))
-  (let [rotation (.. chest -rotation)]
-    (set! (.. chest -rotation) (+ rotation (* 0.1 delta)))))
+(defn render [delta ^js app ^js chest] 
+  (when (.. chest -isRotating)
+    (let [rotation (.. chest -rotation)]
+      (set! (.. chest -rotation) (+ rotation (* 0.1 delta))))))
 
-(defn on-click [event]
-  (js/alert event))
+(defn on-click [^js chest]
+  (let [is-rotating? (.. chest -isRotating)]
+    (set! (.. chest -isRotating) (not is-rotating?))))
 
 (defn init []
   (println "Hello Shadow")
@@ -24,7 +24,10 @@
     (set! (.. chest -height) 100)
     (set! (.. chest -buttonMode) true)
     (set! (.. chest -eventMode) "static")
-    (.. chest (on "pointerdown" on-click))
+    (set! (.. chest -x) (/ (.. app -screen -width) 2))
+    (set! (.. chest -y) (/ (.. app -screen -height) 2))
+    (.. chest (on "pointerdown" (fn [] (on-click chest))))
+    (js/console.log chest)
     (.. app -stage (addChild chest))
     (.. app -ticker (add render-fn))))
 
