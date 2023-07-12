@@ -1,33 +1,35 @@
 (ns main
-  (:require ["pixi.js" :as PIXI]))
+  {:clj-kondo/config '{:lint-as {applied-science.js-interop/let clojure.core/let}}}
+  (:require ["pixi.js" :as PIXI]
+            [applied-science.js-interop :as j]))
 
-(defn render [delta ^js app ^js chest] 
+(defn render [delta ^js app ^js chest]
   (when (.. chest -isRotating)
-    (let [rotation (.. chest -rotation)]
-      (set! (.. chest -rotation) (+ rotation (* 0.1 delta))))))
+    (j/update! chest :rotation (fn [r] (+ r (* 0.2 delta))))))
 
 (defn on-click [^js chest]
-  (let [is-rotating? (.. chest -isRotating)]
-    (set! (.. chest -isRotating) (not is-rotating?))))
+  (j/update! chest :isRotating not))
 
 (defn init []
   (println "Hello Shadow")
   (set! PIXI/BaseTexture.defaultOptions.scaleMode PIXI/SCALE_MODES.NEAREST)
-  (let [app (PIXI/Application. (clj->js {:background "#1099bb"
-                                         :resolution js/devicePixelRatio}))
-        chest-texture (PIXI/Texture.from "/sprites/chest_golden_closed.png")
-        chest (PIXI/Sprite. chest-texture)
-        render-fn (fn [delta] (render delta app chest))]
+  (j/let [^js {{:keys [width height]} :screen
+               :as app} (PIXI/Application. (clj->js {:background "#1099bb"
+                                                     :resolution js/devicePixelRatio}))
+
+          chest-texture (PIXI/Texture.from "/sprites/chest_golden_closed.png")
+          chest (PIXI/Sprite. chest-texture)
+          render-fn (fn [delta] (render delta app chest))]
     (js/document.body.appendChild app.view)
     (.. chest -anchor (set 0.5))
-    (set! (.. chest -width) 100)
-    (set! (.. chest -height) 100)
-    (set! (.. chest -buttonMode) true)
-    (set! (.. chest -eventMode) "static")
-    (set! (.. chest -x) (/ (.. app -screen -width) 2))
-    (set! (.. chest -y) (/ (.. app -screen -height) 2))
+    (-> chest
+        (j/assoc! :width 100)
+        (j/assoc! :height 100)
+        (j/assoc! :buttonMode true)
+        (j/assoc! :eventMode "static")
+        (j/assoc! :x (/ width 2))
+        (j/assoc! :y (/ height 2)))
     (.. chest (on "pointerdown" (fn [] (on-click chest))))
-    (js/console.log chest)
     (.. app -stage (addChild chest))
     (.. app -ticker (add render-fn))))
 
