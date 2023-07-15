@@ -1,12 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- <link rel="stylesheet" href="/style.css"> -->
+  <script src="https://cdn.jsdelivr.net/npm/scittle@0.6.15/dist/scittle.js" type="application/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.js"></script>
+  <script type="application/x-scittle">
+    (js/console.log js/hmm)
+    (set! (.-that js/window) "that is what")
+    (defn my-alert []
+      (js/alert "You clicked!"))
+    ;; export function to use from JavaScript:
+    (set! (.-my_alert js/window) my-alert)
+  </script>
 </head>
+
 <body>
-    <script src="/js/main.js"></script>
+  <script type="application/x-scittle">
+    (defn render [delta ^js app ^js chest] 
+      (when (.. chest -isRotating)
+        (let [rotation (.. chest -rotation)]
+          (set! (.. chest -rotation) (+ rotation (* 0.1 delta))))))
+
+    (defn on-click [^js chest]
+      (let [is-rotating? (.. chest -isRotating)]
+        (set! (.. chest -isRotating) (not is-rotating?))))
+
+    (defn init []
+      (println "Hello Shadow")
+      (set! (.. js/window.PIXI -BaseTexture -defaultOptions -scaleMode) 0)
+      (let [app (js/PIXI.Application. (clj->js {:background "#1099bb"
+                                            :resolution js/devicePixelRatio}))
+            chest-texture (js/PIXI.Texture.from "/sprites/chest_golden_closed.png")
+            chest (js/PIXI.Sprite. chest-texture)
+            render-fn (fn [delta] (render delta app chest))]
+        (js/document.body.appendChild app.view)
+        (.. chest -anchor (set 0.5))
+        (set! (.. chest -width) 100)
+        (set! (.. chest -height) 100)
+        (set! (.. chest -buttonMode) true)
+        (set! (.. chest -eventMode) "static")
+        (set! (.. chest -x) (/ (.. app -screen -width) 2))
+        (set! (.. chest -y) (/ (.. app -screen -height) 2))
+        (.. chest (on "pointerdown" (fn [] (on-click chest))))
+        (js/console.log chest)
+        (.. app -stage (addChild chest))
+        (.. app -ticker (add render-fn))))
+
+    (init)
+      </script>
+  <button onclick="my_alert()">
+    Click me!
+  </button>
 </body>
+
 </html>

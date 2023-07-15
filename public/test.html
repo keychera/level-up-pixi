@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.jsdelivr.net/npm/scittle@0.6.15/dist/scittle.js" type="application/javascript"></script>
+</head>
+<body>
+  <script>
+    var a_value = "hello a_value"
+    var another = { value: "hello_another_value"}
+  </script>
+  <script type="application/x-scittle">
+    (println js/a_value)
+    (println js/another.value)
+    ;; (set! js/a_value "goodbye a_value") ;; this is an error "Invalid assignment target"
+    ;; (set! js/another.value "goodbye another_value") ;; this is also the same error
+    (set! (. js/window -a_value) "goodbye a_value")
+    (println js/a_value)
+    (set! (.. js/another -value) "goodbye another_value")
+    (println js/another.value)
+    (set! (.-value js/another) "goodbye another_value 2")
+    (println js/another.value)
+
+    (println (macroexpand '(.. js/another -value)))
+    
+  </script>
+</body>
+</html>

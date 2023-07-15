@@ -1,0 +1,8 @@
+{
+    "html.format.wrapAttributes": "preserve-aligned",
+    "html.format.wrapLineLength": 0,
+    "[html]": {
+        "editor.suggest.insertMode": "replace",
+        "editor.tabSize": 2,
+    }
+}
