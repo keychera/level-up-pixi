@@ -1,0 +1,15 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-color: #aaa;
+    display: grid;
+    justify-content: center;
+    align-content: center;
+}
+
+canvas {
+    height: 100%;
+}
