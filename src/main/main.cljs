@@ -7,17 +7,20 @@
 
 (defn render [delta ^js app ^js chest]
   (j/let [amplitute 10
-          ^js {:keys [original-x original-y]} chest]
+          ^js {:keys [original-x original-y
+                      next-x next-y]} chest]
     (if (.. chest -isShaking)
       (do (j/assoc! chest :x (+ original-x (* amplitute (rand-nth noise))))
           (j/assoc! chest :y (+ original-y (* amplitute (rand-nth noise)))))
       (do (j/assoc! chest :x original-x)
-          (j/assoc! chest :y original-y)))))
+          (j/assoc! chest :y original-y)))
+    (j/update! chest :original-x (fn [x] (+ x (* (- next-x original-x) 0.1 delta))))
+    (j/update! chest :original-y (fn [y] (+ y (* (- next-y original-y) 0.1 delta))))))
 
 (defn on-bg-click [event ^js chest]
   (j/let [^js {{:keys [x y]} :global} event]
-    (j/assoc! chest :original-x x)
-    (j/assoc! chest :original-y y)))
+    (j/assoc! chest :next-x x)
+    (j/assoc! chest :next-y y)))
 
 (defn on-chest-click [^js chest]
   (j/update! chest :isShaking not))
@@ -45,10 +48,12 @@
         (j/assoc! :height 100)
         (j/assoc! :buttonMode true)
         (j/assoc! :eventMode "static")
-        (j/assoc! :original-x (/ app-width 2))
         (j/assoc! :x (/ app-width 2))
+        (j/assoc! :y (/ app-height 2))
+        (j/assoc! :original-x (/ app-width 2))
         (j/assoc! :original-y (/ app-height 2))
-        (j/assoc! :y (/ app-height 2)))
+        (j/assoc! :next-x (/ app-width 2))
+        (j/assoc! :next-y (/ app-height 2)))
     (.. bg (on "pointerdown" (fn [evt] (on-bg-click evt chest))))
     (.. chest (on "pointerdown" (fn [] (on-chest-click chest))))
     (.. app -stage (addChild bg))
