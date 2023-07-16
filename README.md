@@ -26,10 +26,16 @@ bb deploy.clj
     ☑ tried out some animation flows
     ☑ interacting with mouse events
     ☐ deal with canvas screen size (mobile first)
-    ☐ layout
-    ☐ button and keyboards
-    ☐ progress bar
-    ☐ exp assets
-    ☐ level up modal
-    ☐ research particles, animations
+    ☐ "level up" idea, basically a remake of level-up UI from the game Honkai: Star Rail/Genshin
+        ☐ layout
+        ☐ buttons
+        ☐ progress bar
+        ☐ 3 exp button assets
+        ☐ level up modal
+    ☐ research about animations, figure out the animation render loop 
+        ☐ spawn an animated object
+        ☐ pace/speed of an animation, slower/faster/controllable shake animation
+        ☐ modal-like UI
+        ☐ progress bar animation
+    ☐ research about particles
     ☑ deployment
