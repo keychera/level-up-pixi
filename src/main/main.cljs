@@ -14,31 +14,44 @@
       (do (j/assoc! chest :x original-x)
           (j/assoc! chest :y original-y)))))
 
-(defn on-click [event ^js chest]
+(defn on-bg-click [event ^js chest]
+  (j/let [^js {{:keys [x y]} :global} event]
+    (j/assoc! chest :original-x x)
+    (j/assoc! chest :original-y y)))
+
+(defn on-chest-click [^js chest]
   (j/update! chest :isShaking not))
 
 (defn init []
   (println "Hello Shadow")
   (set! PIXI/BaseTexture.defaultOptions.scaleMode PIXI/SCALE_MODES.NEAREST)
-  (j/let [^js {{:keys [width height]} :screen
+  (j/let [^js {{app-width :width
+                app-height :height} :screen
                :as app} (PIXI/Application. (clj->js {:background "#1099bb"
                                                      :resolution js/devicePixelRatio}))
 
           chest-texture (PIXI/Texture.from "/sprites/chest_golden_closed.png")
           chest (PIXI/Sprite. chest-texture)
+          bg (PIXI/Sprite. PIXI/Texture.WHITE)
           render-fn (fn [delta] (render delta app chest))]
     (js/document.body.appendChild app.view)
     (.. chest -anchor (set 0.5))
+    (-> bg
+        (j/assoc! :width app-width)
+        (j/assoc! :height app-height)
+        (j/assoc! :eventMode "static"))
     (-> chest
         (j/assoc! :width 100)
         (j/assoc! :height 100)
         (j/assoc! :buttonMode true)
         (j/assoc! :eventMode "static")
-        (j/assoc! :original-x (/ width 2))
-        (j/assoc! :x (/ width 2))
-        (j/assoc! :original-y (/ height 2))
-        (j/assoc! :y (/ height 2)))
-    (.. chest (on "pointerdown" (fn [evt] (on-click evt chest))))
+        (j/assoc! :original-x (/ app-width 2))
+        (j/assoc! :x (/ app-width 2))
+        (j/assoc! :original-y (/ app-height 2))
+        (j/assoc! :y (/ app-height 2)))
+    (.. bg (on "pointerdown" (fn [evt] (on-bg-click evt chest))))
+    (.. chest (on "pointerdown" (fn [] (on-chest-click chest))))
+    (.. app -stage (addChild bg))
     (.. app -stage (addChild chest))
     (.. app -ticker (add render-fn))))
 
