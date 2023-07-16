@@ -33,7 +33,7 @@
                :as app} (PIXI/Application. (clj->js {:background "#1099bb"
                                                      :resolution js/devicePixelRatio}))
 
-          chest-texture (PIXI/Texture.from "/sprites/chest_golden_closed.png")
+          chest-texture (PIXI/Texture.from "sprites/chest_golden_closed.png")
           chest (PIXI/Sprite. chest-texture)
           bg (PIXI/Sprite. PIXI/Texture.WHITE)
           render-fn (fn [delta] (render delta app chest))]
