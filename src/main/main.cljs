@@ -3,12 +3,19 @@
   (:require ["pixi.js" :as PIXI]
             [applied-science.js-interop :as j]))
 
-(defn render [delta ^js app ^js chest]
-  (when (.. chest -isRotating)
-    (j/update! chest :rotation (fn [r] (+ r (* 0.2 delta))))))
+(defonce noise [0.9224946357355075 0.195962217681654 0.823908454232499 0.21846578604175848 0.24790535608234543 0.12595059380269924 0.5293608423322345 0.7770868993048079 0.15261535648272484 0.7263776473945731])
 
-(defn on-click [^js chest]
-  (j/update! chest :isRotating not))
+(defn render [delta ^js app ^js chest]
+  (j/let [amplitute 10
+          ^js {:keys [original-x original-y]} chest]
+    (if (.. chest -isShaking)
+      (do (j/assoc! chest :x (+ original-x (* amplitute (rand-nth noise))))
+          (j/assoc! chest :y (+ original-y (* amplitute (rand-nth noise)))))
+      (do (j/assoc! chest :x original-x)
+          (j/assoc! chest :y original-y)))))
+
+(defn on-click [event ^js chest]
+  (j/update! chest :isShaking not))
 
 (defn init []
   (println "Hello Shadow")
@@ -27,9 +34,11 @@
         (j/assoc! :height 100)
         (j/assoc! :buttonMode true)
         (j/assoc! :eventMode "static")
+        (j/assoc! :original-x (/ width 2))
         (j/assoc! :x (/ width 2))
+        (j/assoc! :original-y (/ height 2))
         (j/assoc! :y (/ height 2)))
-    (.. chest (on "pointerdown" (fn [] (on-click chest))))
+    (.. chest (on "pointerdown" (fn [evt] (on-click evt chest))))
     (.. app -stage (addChild chest))
     (.. app -ticker (add render-fn))))
 
