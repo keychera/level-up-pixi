@@ -1,6 +1,7 @@
 (ns main
   {:clj-kondo/config '{:lint-as {applied-science.js-interop/let clojure.core/let}}}
   (:require ["pixi.js" :as PIXI]
+            ["tweedle.js" :refer [Tween Group]]
             [applied-science.js-interop :as j]))
 
 (defonce noise [0.9224946357355075 0.195962217681654 0.823908454232499 0.21846578604175848 0.24790535608234543 0.12595059380269924 0.5293608423322345 0.7770868993048079 0.15261535648272484 0.7263776473945731])
@@ -15,7 +16,8 @@
       (do (j/assoc! chest :x original-x)
           (j/assoc! chest :y original-y)))
     (j/update! chest :original-x (fn [x] (+ x (* (- next-x original-x) 0.1 delta))))
-    (j/update! chest :original-y (fn [y] (+ y (* (- next-y original-y) 0.1 delta))))))
+    (j/update! chest :original-y (fn [y] (+ y (* (- next-y original-y) 0.1 delta)))))
+  (.. Group -shared update))
 
 (defn on-bg-click [event ^js chest]
   (j/let [^js {{:keys [x y]} :global} event]
@@ -28,14 +30,18 @@
 (defn init []
   (println "Hello Shadow")
   (set! PIXI/BaseTexture.defaultOptions.scaleMode PIXI/SCALE_MODES.NEAREST)
-  (j/let [^js {{app-width :width
-                app-height :height} :screen
-               :as app} (PIXI/Application. (clj->js {:background "#1099bb"
-                                                     :resolution js/devicePixelRatio}))
+  (j/let [^js {{app-width :width app-height :height} :screen
+               :as app} (PIXI/Application. (clj->js {:background "#1099bb" 
+                                                     :resolution (or js/window.devicePixelRatio 1)}))
 
           chest-texture (PIXI/Texture.from "sprites/chest_golden_closed.png")
           chest (PIXI/Sprite. chest-texture)
           bg (PIXI/Sprite. PIXI/Texture.WHITE)
+          _ (.. (Tween. (.-scale chest))
+                    (to (clj->js {:x 0.5 :y 0.5}) 1000)
+                    (repeat js/Infinity)
+                    (yoyo true)
+                    (start))
           render-fn (fn [delta] (render delta app chest))]
     (js/document.body.appendChild app.view)
     (.. chest -anchor (set 0.5))
