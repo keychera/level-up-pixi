@@ -19,19 +19,14 @@
     (.. app -renderer (resize w h)))
   app)
 
-(defn render [delta ^js app ^js chest]
-  (j/let [^js {:keys [original-x original-y
-                      next-x next-y]} chest]
-    (j/assoc! chest :x original-x)
-    (j/assoc! chest :y original-y)
-    (j/update! chest :original-x (fn [x] (+ x (* (- next-x original-x) 0.1 delta))))
-    (j/update! chest :original-y (fn [y] (+ y (* (- next-y original-y) 0.1 delta)))))
+#_{:clj-kondo/ignore [:unused-binding]}
+(defn render [delta ^js app]
   (.. Group -shared update))
 
 (defn on-bg-click [event ^js chest]
   (j/let [^js {{:keys [x y]} :global} event]
-    (j/assoc! chest :next-x x)
-    (j/assoc! chest :next-y y)))
+    (println "go to" x y)
+    (.. (Tween. chest) (to (clj->js {:x x :y y}) 250) (start))))
 
 (defn on-chest-click [^js chest]
   (j/update! chest :isShaking not))
@@ -54,7 +49,7 @@
 
           bg (Sprite. PIXI/Texture.WHITE)
 
-          render-fn (fn [delta] (render delta app chest))]
+          render-fn (fn [delta] (render delta app))]
     (js/document.body.appendChild app.view)
     (js/window.addEventListener "resize" #(resize app))
 
@@ -71,11 +66,7 @@
         (j/assoc! :buttonMode true)
         (j/assoc! :eventMode "static")
         (j/assoc! :x (/ app-width 2))
-        (j/assoc! :y (/ app-height 2))
-        (j/assoc! :original-x (/ app-width 2))
-        (j/assoc! :original-y (/ app-height 2))
-        (j/assoc! :next-x (/ app-width 2))
-        (j/assoc! :next-y (/ app-height 2)))
+        (j/assoc! :y (/ app-height 2)))
     (.. chest (on "pointerdown" (fn [] (on-chest-click chest))))
 
     (.. app -stage (addChild bg))
