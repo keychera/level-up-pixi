@@ -25,7 +25,7 @@ bb deploy.clj
     ☑ do pixi tutorial, rotating bunny
     ☑ tried out some animation flows
     ☑ interacting with mouse events
-    ☐ deal with canvas screen size (mobile first)
+    ☑ deal with canvas screen size (mobile first)
     ☐ "level up" idea, basically a remake of level-up UI from the game Honkai: Star Rail/Genshin
         ☐ layout
         ☐ buttons
@@ -34,7 +34,8 @@ bb deploy.clj
         ☐ level up modal
     ☐ research about animations, figure out the animation render loop 
         ☐ spawn an animated object
-        ☐ pace/speed of an animation, slower/faster/controllable shake animation
+        ☑ pace/speed of an animation, slower/faster/controllable shake animation
+            ☐ I think Tweedle.js can cover this, so understanding it is now the goal
         ☐ modal-like UI
         ☐ progress bar animation
     ☐ research about particles
