@@ -6,6 +6,21 @@
 
 (defonce noise [0.9224946357355075 0.195962217681654 0.823908454232499 0.21846578604175848 0.24790535608234543 0.12595059380269924 0.5293608423322345 0.7770868993048079 0.15261535648272484 0.7263776473945731])
 
+;; resize converted from https://github.com/pixijs/open-games/blob/main/puzzling-potions/src/main.ts
+(defn resize [app]
+  (j/let [min-w 375 min-h 700
+          ^js {:keys [innerWidth innerHeight]} js/window
+          scale-x (if (< innerWidth min-w) (/ min-w innerWidth) 1)
+          scale-y (if (< innerHeight min-h) (/ min-h innerHeight) 1)
+          scale (if (> scale-x scale-y) scale-x scale-y)
+          w (* min-w scale)
+          h (* min-h scale)]
+    (j/assoc! app [:renderer :view :style :width] (str innerWidth "px"))
+    (j/assoc! app [:renderer :view :style :height] (str innerHeight "px"))
+    (. js/window (scrollTo 0 0))
+    (.. app -renderer (resize w h)))
+  app)
+
 (defn render [delta ^js app ^js chest]
   (j/let [amplitute 10
           ^js {:keys [original-x original-y
@@ -31,8 +46,9 @@
   (println "Hello Shadow")
   (set! (.. BaseTexture -defaultOptions -scaleMode) PIXI/SCALE_MODES.NEAREST)
   (j/let [^js {{app-width :width app-height :height} :screen :as app}
-          (Application. (clj->js {:background "#1099bb"
-                                  :resolution (or js/window.devicePixelRatio 1)}))
+          (-> (Application. (clj->js {:background "#1099bb"
+                                      :resolution (max js/window.devicePixelRatio 2)}))
+              resize)
 
           chest-texture (.. Texture (from "sprites/chest_golden_closed.png"))
           chest (Sprite. chest-texture)
@@ -46,6 +62,7 @@
 
           render-fn (fn [delta] (render delta app chest))]
     (js/document.body.appendChild app.view)
+    (js/window.addEventListener "resize" #(resize app))
 
     (-> bg
         (j/assoc! :width app-width)
