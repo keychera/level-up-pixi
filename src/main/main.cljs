@@ -1,6 +1,6 @@
 (ns main
   {:clj-kondo/config '{:lint-as {applied-science.js-interop/let clojure.core/let}}}
-  (:require ["pixi.js" :as PIXI]
+  (:require ["pixi.js" :as PIXI :refer [BaseTexture Application Sprite Texture]]
             ["tweedle.js" :refer [Tween Group]]
             [applied-science.js-interop :as j]))
 
@@ -29,19 +29,19 @@
 
 (defn init []
   (println "Hello Shadow")
-  (set! PIXI/BaseTexture.defaultOptions.scaleMode PIXI/SCALE_MODES.NEAREST)
-  (j/let [^js {{app-width :width app-height :height} :screen
-               :as app} (PIXI/Application. (clj->js {:background "#1099bb" 
-                                                     :resolution (or js/window.devicePixelRatio 1)}))
+  (set! (.. BaseTexture -defaultOptions -scaleMode) PIXI/SCALE_MODES.NEAREST)
+  (j/let [^js {{app-width :width app-height :height} :screen :as app}
+          (Application. (clj->js {:background "#1099bb"
+                                  :resolution (or js/window.devicePixelRatio 1)}))
 
-          chest-texture (PIXI/Texture.from "sprites/chest_golden_closed.png")
-          chest (PIXI/Sprite. chest-texture)
-          bg (PIXI/Sprite. PIXI/Texture.WHITE)
+          chest-texture (.. Texture (from "sprites/chest_golden_closed.png"))
+          chest (Sprite. chest-texture)
+          bg (Sprite. PIXI/Texture.WHITE)
           _ (.. (Tween. (.-scale chest))
-                    (to (clj->js {:x 0.5 :y 0.5}) 1000)
-                    (repeat js/Infinity)
-                    (yoyo true)
-                    (start))
+                (to (clj->js {:x 0.5 :y 0.5}) 1000)
+                (repeat js/Infinity)
+                (yoyo true)
+                (start))
           render-fn (fn [delta] (render delta app chest))]
     (js/document.body.appendChild app.view)
     (.. chest -anchor (set 0.5))
