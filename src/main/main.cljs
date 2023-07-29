@@ -36,19 +36,24 @@
 
           chest-texture (.. Texture (from "sprites/chest_golden_closed.png"))
           chest (Sprite. chest-texture)
-          bg (Sprite. PIXI/Texture.WHITE)
           _ (.. (Tween. (.-scale chest))
-                (to (clj->js {:x 0.5 :y 0.5}) 1000)
+                (to (clj->js {:x 1.5 :y 1.5}) 1000)
                 (repeat js/Infinity)
                 (yoyo true)
                 (start))
+
+          bg (Sprite. PIXI/Texture.WHITE)
+
           render-fn (fn [delta] (render delta app chest))]
     (js/document.body.appendChild app.view)
-    (.. chest -anchor (set 0.5))
+
     (-> bg
         (j/assoc! :width app-width)
         (j/assoc! :height app-height)
         (j/assoc! :eventMode "static"))
+    (.. bg (on "pointerdown" (fn [evt] (on-bg-click evt chest))))
+
+    (.. chest -anchor (set 0.5))
     (-> chest
         (j/assoc! :width 100)
         (j/assoc! :height 100)
@@ -60,8 +65,8 @@
         (j/assoc! :original-y (/ app-height 2))
         (j/assoc! :next-x (/ app-width 2))
         (j/assoc! :next-y (/ app-height 2)))
-    (.. bg (on "pointerdown" (fn [evt] (on-bg-click evt chest))))
     (.. chest (on "pointerdown" (fn [] (on-chest-click chest))))
+
     (.. app -stage (addChild bg))
     (.. app -stage (addChild chest))
     (.. app -ticker (add render-fn))))
