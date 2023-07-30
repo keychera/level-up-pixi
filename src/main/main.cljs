@@ -11,13 +11,13 @@
           scale-x (if (< innerWidth min-w) (/ min-w innerWidth) 1)
           scale-y (if (< innerHeight min-h) (/ min-h innerHeight) 1)
           scale (if (> scale-x scale-y) scale-x scale-y)
-          w (* min-w scale)
-          h (* min-h scale)]
-    (j/assoc! app [:renderer :view :style :width] (str innerWidth "px"))
-    (j/assoc! app [:renderer :view :style :height] (str innerHeight "px"))
+          w (* innerWidth scale)
+          h (* innerHeight scale)]
+    (j/assoc-in! app [:renderer :view :style :width] (str innerWidth "px"))
+    (j/assoc-in! app [:renderer :view :style :height] (str innerHeight "px"))
     (. js/window (scrollTo 0 0))
-    (.. app -renderer (resize w h)))
-  app)
+    (.. app -renderer (resize w h))
+    {:app-width w :app-height h}))
 
 #_{:clj-kondo/ignore [:unused-binding]}
 (defn render [delta ^js app]
@@ -34,24 +34,17 @@
 (defn init []
   (println "Hello Shadow")
   (set! (.. BaseTexture -defaultOptions -scaleMode) PIXI/SCALE_MODES.NEAREST)
-  (j/let [^js {{app-width :width app-height :height} :screen :as app}
-          (-> (Application. (clj->js {:background "#1099bb"
-                                      :resolution (max js/window.devicePixelRatio 2)}))
-              resize)
-
+  (j/let [^js app (Application. (clj->js {:background "#1099bb"
+                                          :resolution (max js/window.devicePixelRatio 2)}))
+          _ (js/document.body.appendChild app.view)
+          _ (js/window.addEventListener "resize" #(resize app))
+          {:keys [app-width app-height]} (resize app)
           chest-texture (.. Texture (from "sprites/chest_golden_closed.png"))
           chest (Sprite. chest-texture)
-          _ (.. (Tween. (.-scale chest))
-                (to (clj->js {:x 1.5 :y 1.5}) 1000)
-                (repeat js/Infinity)
-                (yoyo true)
-                (start))
 
           bg (Sprite. PIXI/Texture.WHITE)
 
           render-fn (fn [delta] (render delta app))]
-    (js/document.body.appendChild app.view)
-    (js/window.addEventListener "resize" #(resize app))
 
     (-> bg
         (j/assoc! :width app-width)
