@@ -13,8 +13,9 @@
           scale (if (> scale-x scale-y) scale-x scale-y)
           w (* innerWidth scale)
           h (* innerHeight scale)]
-    (j/assoc-in! app [:renderer :view :style :width] (str innerWidth "px"))
-    (j/assoc-in! app [:renderer :view :style :height] (str innerHeight "px"))
+    (j/assoc! (.. app -renderer -view -style)
+              :width  (str innerWidth  "px")
+              :height (str innerHeight "px"))
     (. js/window (scrollTo 0 0))
     (.. app -renderer (resize w h))
     (j/assoc! app
@@ -61,24 +62,25 @@
           render-fn (fn [delta]
                       (render delta app {:exp-bar exp-bar}))]
 
-    (-> bg
-        (j/assoc! :width app-width)
-        (j/assoc! :height app-height)
-        (j/assoc! :eventMode "static"))
+    (j/assoc! bg
+              :width app-width
+              :height app-height
+              :eventMode "static")
     (.. bg (on "pointerdown" (fn [evt] (on-bg-click evt chest))))
 
-    (-> exp-bar
-        (j/assoc! :x (/ app-width 2))
-        (j/assoc! :y (/ app-height 2)))
+    (j/assoc! exp-bar
+              :x (/ app-width 2)
+              :y (/ app-height 2))
 
     (.. chest -anchor (set 0.5))
-    (-> chest
-        (j/assoc! :width 100)
-        (j/assoc! :height 100)
-        (j/assoc! :buttonMode true)
-        (j/assoc! :eventMode "static")
-        (j/assoc! :x (/ app-width 2))
-        (j/assoc! :y (/ app-height 2)))
+    (j/assoc! chest
+              :width 100
+              :height 100
+              :buttonMode true
+              :eventMode "static"
+              :x (/ app-width 2)
+              :y (/ app-height 2))
+
     (.. chest (on "pointerdown" (fn [] (on-chest-click chest))))
 
     (.. app -stage (addChild bg))
