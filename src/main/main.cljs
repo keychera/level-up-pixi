@@ -22,12 +22,22 @@
               :app-width w
               :app-height h)))
 
+(defn construct-bar [^js graphic]
+  (j/let [^js {:keys [length]} graphic]
+    (doto graphic
+      (. beginFill "0xFF00FF")
+      (. lineStyle 10 "0xFF00FF")
+      (. drawRect 0 0 length 10)
+      (. endFill))))
+
 #_{:clj-kondo/ignore [:unused-binding]}
 (defn render [delta ^js app {:keys [exp-bar]}]
   (j/let [^js {:keys [app-width app-height]} app]
     (j/assoc! exp-bar
               :x (* app-width 0.375)
               :y (/ app-height 2.75)))
+  (.clear exp-bar)
+  (construct-bar exp-bar)
   (.. Group -shared update))
 
 (defn on-bg-click [event ^js chest]
@@ -37,6 +47,8 @@
 
 (defn on-chest-click [^js chest]
   (j/update! chest :isShaking not))
+
+
 
 (defn init []
   (println "Hello Shadow")
@@ -50,11 +62,13 @@
           bg (Sprite. PIXI/Texture.WHITE)
 
           exp-bar (Graphics.)
-          _ (doto exp-bar
-              (. beginFill "0xFF00FF")
-              (. lineStyle 10 "0xFF00FF")
-              (. drawRect 0 0 (* app-width 0.225) 10)
-              (. endFill))
+          _ (j/assoc! exp-bar :length (* app-width 0.225))
+          _ (construct-bar exp-bar)
+          _ (.. (Tween. exp-bar) 
+                (to (clj->js {:length (* app-width 0.5)}) 1000)
+                (yoyo true)
+                (repeat js/Infinity)
+                (start))
 
           chest-texture (.. Texture (from "sprites/chest_golden_closed.png"))
           chest (Sprite. chest-texture)
