@@ -25,9 +25,9 @@
 (defn construct-bar [^js graphic]
   (j/let [^js {:keys [length]} graphic]
     (doto graphic
-      (. beginFill "0xFF00FF")
-      (. lineStyle 10 "0xFF00FF")
-      (. drawRect 0 0 length 10)
+      (. beginFill "0x86DCC1")
+      (. lineStyle 10 "0x86DCC1")
+      (. drawRect 0 0 length 4)
       (. endFill))))
 
 #_{:clj-kondo/ignore [:unused-binding]}
@@ -63,6 +63,8 @@
           bg (Sprite. PIXI/Texture.WHITE)
 
           exp-bar (Graphics.)
+          x-axis (Graphics.)
+          y-axis (Graphics.)
 
           chest-texture (.. Texture (from "sprites/chest_golden_closed.png"))
           chest (Sprite. chest-texture)
@@ -82,6 +84,25 @@
               :y (/ app-height 2))
     (construct-bar exp-bar)
 
+    (j/assoc! x-axis
+              :x 0
+              :y (/ app-height 2))
+    (doto x-axis
+      (. beginFill "0x000000")
+      (. lineStyle 5 "0x000000")
+      (. drawRect 0 0 1000 0.2)
+      (. endFill))
+
+    (j/assoc! y-axis
+              :x (/ app-width 2)
+              :y (/ app-height 3)) ;; still confused with the coord here, what?
+    (doto y-axis
+      (. beginFill "0x000000")
+      (. lineStyle 5 "0x000000")
+      (. drawRect 0 0 0.2 1000)
+      (. endFill))
+    
+
     (.. chest -anchor (set 0.5))
     (j/assoc! chest
               :width 100
@@ -95,11 +116,15 @@
 
     (.. app -stage (addChild bg))
     (.. app -stage (addChild exp-bar))
+    (.. app -stage (addChild x-axis))
+    (.. app -stage (addChild y-axis))
     (.. app -stage (addChild chest))
 
     (.. app -ticker (add render-fn))))
 
 (comment
+  (/ 2787 3)
+
   (clj->js {:background "#1099bb"
             :resize js/window
             :resolution js/devicePixelRatio})
