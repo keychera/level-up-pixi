@@ -36,14 +36,15 @@
     (j/assoc! exp-bar
               :x (* app-width 0.375)
               :y (/ app-height 2.75)))
-  (.clear exp-bar)
-  (construct-bar exp-bar)
   (.. Group -shared update))
 
-(defn on-bg-click [event ^js chest]
-  (j/let [^js {{:keys [x y]} :global} event]
-    (println "go to" x y)
-    (.. (Tween. chest) (to (clj->js {:x x :y y}) 250) (start))))
+(defn on-bg-click [event ^js chest ^js exp-bar]
+  #_(j/let [^js {{:keys [x y]} :global} event]
+      (println "go to" x y)
+      (.. (Tween. chest) (to (clj->js {:x x :y y}) 250) (start)))
+  (j/update! exp-bar :length #(+ % 10))
+  (.clear exp-bar)
+  (construct-bar exp-bar))
 
 (defn on-chest-click [^js chest]
   (j/update! chest :isShaking not))
@@ -62,13 +63,6 @@
           bg (Sprite. PIXI/Texture.WHITE)
 
           exp-bar (Graphics.)
-          _ (j/assoc! exp-bar :length (* app-width 0.225))
-          _ (construct-bar exp-bar)
-          _ (.. (Tween. exp-bar) 
-                (to (clj->js {:length (* app-width 0.5)}) 1000)
-                (yoyo true)
-                (repeat js/Infinity)
-                (start))
 
           chest-texture (.. Texture (from "sprites/chest_golden_closed.png"))
           chest (Sprite. chest-texture)
@@ -80,11 +74,13 @@
               :width app-width
               :height app-height
               :eventMode "static")
-    (.. bg (on "pointerdown" (fn [evt] (on-bg-click evt chest))))
+    (.. bg (on "pointerdown" (fn [evt] (on-bg-click evt chest exp-bar))))
 
     (j/assoc! exp-bar
+              :length (* app-width 0.225)
               :x (/ app-width 2)
               :y (/ app-height 2))
+    (construct-bar exp-bar)
 
     (.. chest -anchor (set 0.5))
     (j/assoc! chest
@@ -93,7 +89,7 @@
               :buttonMode true
               :eventMode "static"
               :x (/ app-width 2)
-              :y (/ app-height 2))
+              :y (+ (/ app-height 2) 10))
 
     (.. chest (on "pointerdown" (fn [] (on-chest-click chest))))
 
