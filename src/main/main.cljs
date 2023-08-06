@@ -1,6 +1,6 @@
 (ns main
   {:clj-kondo/config '{:lint-as {applied-science.js-interop/let clojure.core/let}}}
-  (:require ["pixi.js" :as PIXI :refer [BaseTexture Application Graphics Sprite Texture]]
+  (:require ["pixi.js" :as PIXI :refer [BaseTexture Application Graphics Sprite Texture Container]]
             ["tweedle.js" :refer [Tween Group]]
             [applied-science.js-interop :as j]))
 
@@ -32,9 +32,9 @@
       (. endFill))))
 
 #_{:clj-kondo/ignore [:unused-binding]}
-(defn render [delta ^js app {:keys [exp-bar]}]
+(defn render [delta ^js app {:keys [exp-bar exp-container]}]
   (j/let [^js {:keys [app-width app-height]} app]
-    (j/assoc! exp-bar
+    (j/assoc! exp-container
               :x (* app-width 0.375)
               :y (/ app-height 2.75)))
   (.. Group -shared update))
@@ -51,7 +51,6 @@
   (j/update! chest :isShaking not))
 
 
-
 (defn init []
   (println "Hello Shadow")
   (set! (.. BaseTexture -defaultOptions -scaleMode) PIXI/SCALE_MODES.NEAREST)
@@ -63,7 +62,11 @@
 
           bg (Sprite. PIXI/Texture.WHITE)
 
+          exp-container (Container.)
           exp-bar (Graphics.)
+          _ (. exp-container addChild exp-bar)
+
+
           x-axis (Graphics.)
           y-axis (Graphics.)
 
@@ -71,7 +74,8 @@
           chest (Sprite. chest-texture)
 
           render-fn (fn [delta]
-                      (render delta app {:exp-bar exp-bar}))]
+                      (render delta app {:exp-bar exp-bar
+                                         :exp-container exp-container}))]
 
     (j/assoc! bg
               :width app-width
@@ -79,10 +83,7 @@
               :eventMode "static")
     (.. bg (on "pointerdown" (fn [evt] (on-bg-click evt chest exp-bar))))
 
-    (j/assoc! exp-bar
-              :length (* app-width 0.225)
-              :x (/ app-width 2)
-              :y (/ app-height 2))
+    (j/assoc! exp-bar :length (* app-width 0.225))
     (construct-bar exp-bar)
 
     (j/assoc! x-axis
@@ -102,7 +103,7 @@
       (. lineStyle 5 "0x000000")
       (. drawRect 0 0 0.2 100000)
       (. endFill))
-    
+
 
     (.. chest -anchor (set 0.5))
     (j/assoc! chest
@@ -116,7 +117,7 @@
     (.. chest (on "pointerdown" (fn [] (on-chest-click chest))))
 
     (.. app -stage (addChild bg))
-    (.. app -stage (addChild exp-bar))
+    (.. app -stage (addChild exp-container))
     (.. app -stage (addChild x-axis))
     (.. app -stage (addChild y-axis))
     (.. app -stage (addChild chest))
