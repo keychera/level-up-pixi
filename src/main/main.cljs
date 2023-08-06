@@ -8,6 +8,7 @@
 (defn resize [app]
   (j/let [min-w 375 min-h 700
           ^js {:keys [innerWidth innerHeight]} js/window
+          _ (js/console.log js/window)
           scale-x (if (< innerWidth min-w) (/ min-w innerWidth) 1)
           scale-y (if (< innerHeight min-h) (/ min-h innerHeight) 1)
           scale (if (> scale-x scale-y) scale-x scale-y)
@@ -90,16 +91,16 @@
     (doto x-axis
       (. beginFill "0x000000")
       (. lineStyle 5 "0x000000")
-      (. drawRect 0 0 1000 0.2)
+      (. drawRect 0 0 100000 0.2)
       (. endFill))
 
     (j/assoc! y-axis
               :x (/ app-width 2)
-              :y (/ app-height 3)) ;; still confused with the coord here, what?
+              :y 0) ;; still confused with the coord here, what?
     (doto y-axis
       (. beginFill "0x000000")
       (. lineStyle 5 "0x000000")
-      (. drawRect 0 0 0.2 1000)
+      (. drawRect 0 0 0.2 100000)
       (. endFill))
     
 
